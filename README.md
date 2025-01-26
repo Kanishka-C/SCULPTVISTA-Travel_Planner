@@ -30,6 +30,19 @@ cd Travel-Itinerary
 ```bash
 cd backend
 ```
+- Set up a virtual environment
+```bash
+python -m venv venv
+```
+- Activate the virtual environment:
+  - Windows:
+    ```bash
+    venv\Scripts\activate
+    ```
+  - macOS/Linux: 
+    ```bash
+    source venv/bin/activate
+    ```
 - Install the required dependencies:
 ```bash
 pip install -r requirements.txt  
