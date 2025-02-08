@@ -5,32 +5,27 @@ import { Link } from 'react-router-dom';
 const Home = () => {
   return (
     <div className="home full-screen">
-      {/* Hero Section with Background Video */}
       <div className="hero-container centered">
         <video autoPlay loop muted className="background-video">
           <source src="/background2.mp4" type="video/mp4" />
           Your browser does not support the video tag.
         </video>
 
-        {/* Navigation */}
         <div className="nav-links">
           <Link to="/login" className="nav-link">Login</Link>
           <Link to="/signup" className="nav-link">Sign Up</Link>
         </div>
 
-        {/* Centered Content */}
         <div className="hero-content">
           <h1 className="hero-title">Plan Your Next Adventure with Ease</h1>
           <p className="hero-subtitle">
             Discover personalized travel recommendations and create unforgettable memories.
           </p>
-          
-          {/* Create Itinerary Button */}
+        
           <button className="cta-button">Create Itinerary</button>
         </div>
       </div>
 
-      {/* Features Section (Visible only on Scroll) */}
       <section className="features-section hidden-on-load">
         <h2>Why Choose Us?</h2>
         <div className="features-grid">
