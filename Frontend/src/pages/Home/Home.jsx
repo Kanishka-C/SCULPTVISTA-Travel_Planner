@@ -22,7 +22,8 @@ const Home = () => {
             Discover personalized travel recommendations and create unforgettable memories.
           </p>
         
-          <button className="cta-button">Create Itinerary</button>
+          <Link to="/Chatbot" className="cta-button">Create Itinerary</Link>
+          
         </div>
       </div>
 

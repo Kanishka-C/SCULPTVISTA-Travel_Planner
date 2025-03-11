@@ -41,6 +41,7 @@ body, html {
 }
 
 .nav-links {
+  z-index: 10;
   position: absolute;
   top: 20px;
   right: 80px;
@@ -50,6 +51,7 @@ body, html {
 
 .nav-link {
   padding: 10px 16px;
+  z-index:10;
   background-color: hsla(16, 87%, 54%, 0.4);
   color: white;
   font-weight: 500;
@@ -175,3 +177,4 @@ body, html {
     font-size: 0.95rem;
   }
 }
+
