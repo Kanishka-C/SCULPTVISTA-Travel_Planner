@@ -4,4 +4,4 @@
 __pycache__/
 db.sqlite3
 .env
-/backend/travel_planner/venv/
+venv/
