@@ -45,16 +45,25 @@ def create_prompt_from_preferences(preferences):
             "activity": "Morning activity",
             "description": "Description of activity",
             "location": "Location name"
+          "breakfast":{{
+            "restaurant": "Restaurant name, rate per meal"
+          }},
           }},
           "afternoon": {{
             "activity": "Afternoon activity",
             "description": "Description of activity",
             "location": "Location name"
+          "lunch":m{{
+            "restaurant": "Restaurant name, rate per meal"
+          }},
           }},
           "evening": {{
             "activity": "Evening activity",
             "description": "Description of activity",
             "location": "Location name"
+          }},
+          "dinner": {{
+            "restaurant": "Restaurant name, rate per meal"
           }},
         }},
         // Additional days...
