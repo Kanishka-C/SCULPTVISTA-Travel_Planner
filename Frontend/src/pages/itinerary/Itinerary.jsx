@@ -1,4 +1,3 @@
-// src/pages/Itinerary.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jsPDF } from 'jspdf'; // Import jsPDF for PDF generation
