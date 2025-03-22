@@ -1,0 +1,91 @@
+.past-itineraries-container {
+    padding: 20px;
+    width: 100vw; /* Full viewport width */
+    min-height: 100vh; /* Full viewport height */
+    margin: 0; /* Remove default margin */
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* Start content from the top */
+    overflow-y: auto; /* Allow scrolling if content overflows */
+    box-sizing: border-box;
+  }
+  
+  .past-itineraries-header {
+    text-align: center;
+    color: #333; /* Changed from #ffffff to #333 to be visible on white background */
+    margin-bottom: 20px;
+  }
+  
+  .past-itineraries-list {
+    list-style-type: none;
+    padding: 0;
+    width: 100%;
+    max-width: 800px; /* Keep content width constrained for readability */
+  }
+  
+  .past-itineraries-item {
+    background-color: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    margin: 10px 0;
+  }
+  
+  .past-itineraries-item h3 {
+    margin: 0 0 10px;
+    color: #555;
+  }
+  
+  .past-itineraries-text {
+    font-size: 16px;
+    color: #121212; /* Already a dark color, should be visible on white background */
+    margin: 5px 0;
+  }
+  
+  /* Added styles for itinerary-list and itinerary-card */
+  .itinerary-list {
+    width: 100%;
+    max-width: 800px; /* Match the max-width of other content */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .itinerary-card {
+    background-color: #ffffff;
+    border-radius: 5px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    margin: 10px 0;
+  }
+  
+  .itinerary-card h3 {
+    margin: 0 0 10px;
+    color: #555;
+  }
+  
+  .past-itineraries-button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px; /* Add margin at the bottom for spacing */
+  }
+  
+  .past-itineraries-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #2ecc71;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .past-itineraries-button:hover {
+    background-color: #27ae60;
+  }
