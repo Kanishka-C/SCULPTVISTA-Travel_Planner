@@ -68,12 +68,10 @@ const PastItineraries = () => {
 
     fetchItineraries();
   }, [mapsLoaded]); // Depend on mapsLoaded instead of isLoaded
-
   const getMapCenter = async (itinerary, locations) => {
     const destination = itinerary.itinerary_data.tripName?.match(/to\s(.+?)(\s|$)/)?.[1] || "Unknown";
     const hotelCoords = itinerary.hotels?.[0];
     const restaurantCoords = itinerary.restaurants?.[0];
-
     if (hotelCoords && isValidLatLng(hotelCoords.lat, hotelCoords.lng)) {
       console.log("Map center set to hotel coordinates:", { lat: hotelCoords.lat, lng: hotelCoords.lng });
       return { lat: hotelCoords.lat, lng: hotelCoords.lng };
@@ -259,10 +257,3 @@ const PastItineraries = () => {
 };
 
 export default PastItineraries;
-
-
-
-
-
-
-

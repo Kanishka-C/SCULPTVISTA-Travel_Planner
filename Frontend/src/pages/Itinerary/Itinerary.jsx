@@ -15,10 +15,8 @@ const Itinerary = () => {
   const [locations, setLocations] = useState([]);
   const [mapCenter, setMapCenter] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-
   const googleMapsApiKey = "YOUR_API_KEY"; // Replace with your actual key
 
-  
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey,
     libraries: LIBRARIES,
@@ -646,20 +644,3 @@ const Itinerary = () => {
 };
 
 export default Itinerary;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
