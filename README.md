@@ -4,31 +4,34 @@ SCULPTIVISTA is a personalized travel planner that leverages AI to create custom
 
 ## 🎯 Features
 - 🧭 Personalized travel recommendations based on user preferences.
-- 💡 Integration of AI (via Gemini API) for smart itinerary planning.
+- 💡 Integration of AI (via Gemini) for smart itinerary planning.
 - 🏞️ Tourist destination suggestions based on interests and travel history.
 - 💰 Budget prediction and cost breakdown for trips.
 - 🚗 Distance and travel time calculations for better planning.
+- 🛌 Hotel and restaurant suggestions with visualization in Google Maps
+- 📄 Download generated itineraries in a PDF format for offline access.
 ## 🛠 Tech Stack
 ### Frontend
 - HTML
 - CSS
-- JavaScript
-- React Framework
+- React.js library
+- Vite (build tool and development server)
 ### Backend
-- Python (Django Framework)
+- Python Django REST Framework
 - Gemini API
+- Google Maps API
 ### Database
-- MySQL/MongoDB
+- SQLite
 ## Setup Instructions
 ### 1.Clone the repository
 ```bash
 git clone https://github.com/Kanishka-C/SCULPTVISTA-Travel_Planner.git
-cd Travel-Itinerary
+cd SCULPTVISTA-Travel_Planner
 ```
 ### 2. Backend Setup
-- Navigate to ```/backend``` directory:
+- Open command prompt and navigate to ```/backend``` directory:
 ```bash
-cd backend
+cd backend/travelplanner
 ```
 - Set up a virtual environment
 ```bash
@@ -52,18 +55,18 @@ pip install -r requirements.txt
 python manage.py runserver  
 ```
 ### 3.Frontend Setup
-- Navigate to the ```/frontend``` directory and install dependencies:
+- Navigate to the ```/Frontend``` directory and install dependencies:
 ```bash
-cd frontend  
+cd Frontend  
 npm install  
 ```
 - Start the development server:
 ```bash
-npm start  
+npm run dev  
 ```
 ### 4. Run the application
 Open your browser and go to: 
- http://localhost:3000  
+ http://localhost:5173
 
  ## Acknowledgements
- - Thanks to [Gemini API](https://ai.google.dev/) for powering the AI features
+ - Thanks to [Gemini API](https://ai.google.dev/) and [Google Maps API](https://mapsplatform.google.com/) for powering the AI features
