@@ -1,17 +1,16 @@
-
-# services/prompt_service.py
 import logging
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
 def get_unstructured_itinerary_prompt(preferences):
-    departure = preferences.get('departure location', 'NSS College of Engineering, Palakkad')
+    departure = preferences.get('startPoint', 'NSS College of Engineering, Palakkad')  # Changed to 'startPoint'
     destination = preferences.get('destination', 'Ooty')
     budget = preferences.get('budget', '6000 Rupees')
     budget_value = budget.split()[0] if budget.split() else "6000"
     travel_style = preferences.get('travel_style', 'Solo')
     transportation = preferences.get('transportation', 'public transport')
+    health_issues = preferences.get('health_issues','no health issues')
     try:
         days = (datetime.strptime(preferences.get('end_date', '2025-06-01'), '%Y-%m-%d') - 
                 datetime.strptime(preferences.get('start_date', '2025-06-01'), '%Y-%m-%d')).days + 1
@@ -23,10 +22,10 @@ def get_unstructured_itinerary_prompt(preferences):
     generate an itinerary for a {travel_style} {days}-day trip from {departure} to {destination}, 
     generate a detailed travel plan with mode of transportation as {transportation}, 
     activities, restaurant names (for breakfast, lunch, and dinner), 
-    accommodation (with name of hotel), 
+    accommodation (with name of hotel), i have {health_issues},
     also generate a realistic budget breaking down the cost within {budget_value} Rupees. 
     For each hotel, restaurant, and activity location, include its Google Maps Place ID (e.g., ChIJ...) 
-    if available, or note 'ID not available' if not found.
+    if available, or note 'ID not available' if not found.(note the prime focus of activities in the itinerary should be the destination,avoid including travel activities in the starting point )
     """
     return prompt
 
@@ -86,5 +85,3 @@ def get_structured_itinerary_prompt(raw_itinerary):
     - Provide the response as a valid JSON object only.
     """
     return prompt
-
-
