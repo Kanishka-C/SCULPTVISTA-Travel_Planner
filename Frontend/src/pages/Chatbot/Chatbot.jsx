@@ -1,25 +1,35 @@
-// src/pages/Chatbot.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import "./Chatbot.css";
+import api from "../../api";
 
 const Chatbot = () => {
-  const [messages, setMessages] = useState([
-    { text: "Hi, I am Noela TravelBot. Let's create your personalized itinerary!", sender: "bot" }
-  ]);
-  const [step, setStep] = useState(0);
-  const [inputValue, setInputValue] = useState("");
-  const [travelDates, setTravelDates] = useState({ start: "", end: "" });
-  const [userResponses, setUserResponses] = useState({
-    destination: "",
-    departure: "",
-    travelDates: { start: "", end: "" },
-    travelType: "",
-    budget: "",
-    transportation: "",
-    interests: [],
-    healthConditions: "",
+  const [messages, setMessages] = useState(() => {
+    const savedMessages = localStorage.getItem('chatbotMessages');
+    return savedMessages ? JSON.parse(savedMessages) : [
+      { text: "Hi, I am Noela TravelBot. Let's create your personalized itinerary!", sender: "bot" }
+    ];
   });
+  const [step, setStep] = useState(() => parseInt(localStorage.getItem('chatbotStep')) || 0);
+  const [inputValue, setInputValue] = useState("");
+  const [travelDates, setTravelDates] = useState(() => {
+    const savedDates = localStorage.getItem('chatbotTravelDates');
+    return savedDates ? JSON.parse(savedDates) : { start: "", end: "" };
+  });
+  const [userResponses, setUserResponses] = useState(() => {
+    const savedResponses = localStorage.getItem('chatbotResponses');
+    return savedResponses ? JSON.parse(savedResponses) : {
+      destination: "",
+      departure: "",
+      travelDates: { start: "", end: "" },
+      travelType: "",
+      budget: "",
+      transportation: "",
+      interests: [],
+      healthConditions: "",
+    };
+  });
+  const [isLoading, setIsLoading] = useState(false);
 
   const chatWindowRef = useRef(null);
   const navigate = useNavigate();
@@ -36,7 +46,7 @@ const Chatbot = () => {
   ];
 
   const options = {
-    0: ["Delhi", "Jaipur", "Goa", "Kerala", "Manali", "Varanasi", "Mysore", "Bengaluru", "No Preferred Destination"],
+    0: ["Delhi", "Jaipur", "Goa", "Kerala", "Manali", "Varanasi", "Mysore", "Bengaluru"],
     3: ["Solo", "Family", "With Kids", "Group"],
     4: ["Low", "Medium", "High", "Luxury"],
     5: ["Flight", "Train", "Car", "Bus"],
@@ -48,66 +58,36 @@ const Chatbot = () => {
     if (chatWindowRef.current) {
       chatWindowRef.current.scrollTop = chatWindowRef.current.scrollHeight;
     }
-  }, [messages]);
+    localStorage.setItem('chatbotMessages', JSON.stringify(messages));
+    localStorage.setItem('chatbotStep', step);
+    localStorage.setItem('chatbotTravelDates', JSON.stringify(travelDates));
+    localStorage.setItem('chatbotResponses', JSON.stringify(userResponses));
+  }, [messages, step, travelDates, userResponses]);
+
+  useEffect(() => {
+    if (step === questions.length && Object.keys(userResponses).every(key => userResponses[key])) {
+      setIsLoading(true);
+      sendDataToBackend(userResponses);
+    }
+  }, []);
 
   const validateInput = (answer) => {
-    if (!answer.trim()) {
-      return "Input cannot be empty!";
+    if (!answer.trim()) return "Input cannot be empty!";
+    if (step === 0 && !/^[A-Za-z\s]+$/.test(answer.trim())) return "Please enter a valid destination (letters and spaces only).";
+    if (step === 1 && !/^[A-Za-z\s]+$/.test(answer.trim())) return "Please enter a valid departure point (letters and spaces only).";
+    if (step === 2) {
+      if (!travelDates.start || !travelDates.end) return "Please select both start and end dates!";
+      if (new Date(travelDates.start) > new Date(travelDates.end)) return "End date must be after the start date!";
     }
-    if (step === 0) { // Destination
-      if (!/^[A-Za-z\s]+$/.test(answer.trim())) {
-        return "Please enter a valid Destination.";
-      }
-    }
-    if (step === 1) { // Departure
-      if (!/^[A-Za-z\s]+$/.test(answer.trim())) {
-        return "Please enter a valid Departure (max 50 characters).";
-      }
-    }
-    if (step === 2) { // Travel Dates Validation
-      if (!travelDates.start || !travelDates.end) {
-        return "Please select both start and end dates!";
-      }
-      if (new Date(travelDates.start) > new Date(travelDates.end)) {
-        return "End date must be after the start date!";
-      }
-    }
-    if (step === 3) { // travel with
-      if (!/^[A-Za-z\s]+$/.test(answer.trim())) {
-        return "Please enter a valid option.";
-      }
-    }
-    if (step === 4) { // Budget Validation
+    if (step === 3 && !/^[A-Za-z\s]+$/.test(answer.trim())) return "Please enter a valid travel type (e.g., Solo, Family).";
+    if (step === 4) {
       const validBudgets = ["Low", "Medium", "High", "Luxury"];
-      if (validBudgets.includes(answer)) {
-        return null; // Valid if selected from dropdown
-      }
-      if (!/^\d+k?$/.test(answer)) {
-        return "Please enter a valid budget (e.g., Low, Medium, High, Luxury, 5000, or 5k)!";
-      }
-      let budgetValue;
-      if (answer.toLowerCase().endsWith("k")) {
-        budgetValue = parseInt(answer.toLowerCase().replace("k", ""), 10) * 1000;
-      } else {
-        budgetValue = parseInt(answer, 10);
-      }
+      if (!validBudgets.includes(answer) && !/^\d+k?$/.test(answer)) return "Please enter a valid budget (e.g., Low, Medium, High, Luxury, 5000, 5k)!";
     }
-    if (step === 5) { // Transportation Validation
-      if (!/^[A-Za-z\s]+$/.test(answer)) {
-        return "Please enter a valid transportation mode (only letters allowed, no numbers or symbols)!";
-      }
-    }
-    if (step === 6) { // interest
-      if (!/^[A-Za-z\s]+$/.test(answer.trim())) {
-        return "Please enter a valid interest (max 50 characters).";
-      }
-    }
-    if (step === 7) { // Health Conditions Validation
-      if (!/^[A-Za-z\s]+$/.test(answer.trim())) {
-        return "Please enter a valid health condition (max 50 characters).";
-      }
-    }
-    return null; // Input is valid
+    if (step === 5 && !/^[A-Za-z\s]+$/.test(answer)) return "Please enter a valid transportation mode (letters and spaces only)!";
+    if (step === 6 && !/^[A-Za-z\s]+$/.test(answer.trim())) return "Please enter a valid interest (letters and spaces only).";
+    if (step === 7 && !/^[A-Za-z\s]+$/.test(answer.trim())) return "Please enter a valid health condition (letters and spaces only).";
+    return null;
   };
 
   const handleNextStep = (answer) => {
@@ -125,32 +105,15 @@ const Chatbot = () => {
 
     const updatedResponses = { ...userResponses };
     switch (step) {
-      case 0:
-        updatedResponses.destination = answer;
-        break;
-      case 1:
-        updatedResponses.departure = answer;
-        break;
-      case 2:
-        updatedResponses.travelDates = { start: travelDates.start, end: travelDates.end };
-        break;
-      case 3:
-        updatedResponses.travelType = answer;
-        break;
-      case 4:
-        updatedResponses.budget = answer;
-        break;
-      case 5:
-        updatedResponses.transportation = answer;
-        break;
-      case 6:
-        updatedResponses.interests = [...updatedResponses.interests, answer];
-        break;
-      case 7:
-        updatedResponses.healthConditions = answer;
-        break;
-      default:
-        break;
+      case 0: updatedResponses.destination = answer; break;
+      case 1: updatedResponses.departure = answer; break;
+      case 2: updatedResponses.travelDates = { start: travelDates.start, end: travelDates.end }; break;
+      case 3: updatedResponses.travelType = answer; break;
+      case 4: updatedResponses.budget = answer; break;
+      case 5: updatedResponses.transportation = answer; break;
+      case 6: updatedResponses.interests = [...updatedResponses.interests, answer]; break;
+      case 7: updatedResponses.healthConditions = answer; break;
+      default: break;
     }
     setUserResponses(updatedResponses);
     setInputValue("");
@@ -158,7 +121,7 @@ const Chatbot = () => {
     if (step < questions.length - 1) {
       setTimeout(() => setStep(step + 1), 500);
     } else {
-      console.log("Last question answered, calling sendDataToBackend...");
+      setIsLoading(true);
       sendDataToBackend(updatedResponses);
     }
   };
@@ -166,54 +129,46 @@ const Chatbot = () => {
   const sendDataToBackend = async (data) => {
     try {
       const formattedData = {
-        ...data,
+        destination: data.destination,
+        departure: data.departure,
         start_date: data.travelDates.start,
-        end_date: data.travelDates.end
+        end_date: data.travelDates.end,
+        travel_style: data.travelType,
+        budget: data.budget,
+        transportation: data.transportation,
+        activities: data.interests,
+        health_issues: data.healthConditions ? [data.healthConditions] : []
       };
-      delete formattedData.travelDates;
 
       console.log("Sending data to backend:", formattedData);
 
-      // Simulate a backend response since the backend is not ready
-      const mockResponse = {
-        id: 1,
-        destination: formattedData.destination,
-        departure: formattedData.departure,
-        start_date: formattedData.start_date,
-        end_date: formattedData.end_date,
-        travelType: formattedData.travelType,
-        budget: formattedData.budget,
-        transportation: formattedData.transportation,
-        interests: formattedData.interests,
-        healthConditions: formattedData.healthConditions,
-        itinerary: [
-          { day: 1, activity: "Visit a famous landmark", location: formattedData.destination },
-          { day: 2, activity: "Explore local culture", location: formattedData.destination }
-        ]
-      };
+      const response = await api.post('/api/itinerary/generate-itinerary/', formattedData, {
+        withCredentials: true
+      });
 
-      console.log("Mock backend response:", mockResponse);
-
-      const result = mockResponse;
+      console.log("Backend response:", response.data);
 
       setMessages((prevMessages) => [
         ...prevMessages,
-        { text: "Your personalized itinerary has been created! Redirecting to your itinerary...", sender: "bot" }
+        { text: "Your personalized itinerary has been created! Redirecting...", sender: "bot" }
       ]);
       setTimeout(() => {
-        console.log("Redirecting to /itinerary...");
-        navigate('/itinerary', { state: { itinerary: result } });
+        setIsLoading(false);
+        localStorage.removeItem('chatbotMessages');
+        localStorage.removeItem('chatbotStep');
+        localStorage.removeItem('chatbotTravelDates');
+        localStorage.removeItem('chatbotResponses');
+        navigate('/itinerary', { state: { itinerary: response.data } });
       }, 1000);
     } catch (error) {
       console.error("Error sending data:", error);
       setMessages((prevMessages) => [
         ...prevMessages,
-        { text: "There was an error creating your itinerary. Please try again.", sender: "bot" }
+        { text: `Error: ${error.response?.data?.detail || error.message}. Please try again or log in.`, sender: "bot" }
       ]);
-      setTimeout(() => {
-        console.log("Redirecting to /itinerary despite error...");
-        navigate('/itinerary');
-      }, 1000);
+      setIsLoading(false);
+      setStep(0);
+      navigate('/login');
     }
   };
 
@@ -222,41 +177,52 @@ const Chatbot = () => {
   };
 
   return (
-    <div className="chatbot-container">
-      <h2>TravelBot</h2>
-      <div className="chatbot-actions">
-        <button onClick={handleViewPastItineraries} className="past-itineraries-btn">
-          View Past Itineraries
-        </button>
-      </div>
-      <div className="chat-window" ref={chatWindowRef}>
-        {messages.map((msg, index) => (
-          <div key={index} className={msg.sender === "user" ? "user-message" : "bot-message"}>
-            {msg.text}
+    <div className="chatbot-wrapper">
+      <div className="chatbot-container">
+        <h2>TravelBot</h2>
+        <div className="chatbot-actions">
+          <button onClick={handleViewPastItineraries} className="past-itineraries-btn">
+            View Past Itineraries
+          </button>
+        </div>
+        <div className="chat-section">
+          <div className="chat-window" ref={chatWindowRef}>
+            {messages.map((msg, index) => (
+              <div key={index} className={msg.sender === "user" ? "user-message" : "bot-message"}>
+                {msg.text}
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-      <div className="question">
-        <h3>
-          <span>{step < questions.length ? questions[step] : "Your itinerary is being created..."}</span>
-        </h3>
-        {step < questions.length && (
-          <>
+        </div>
+        <div className="question">
+          <span>
+            {isLoading
+              ? "Generating your itinerary, please wait..."
+              : step < questions.length
+              ? questions[step]
+              : "Ready to create another itinerary?"}
+          </span>
+        </div>
+        {!isLoading && step < questions.length && (
+          <div className="input-container">
             {step === 2 ? (
-              <div className="input-container">
-                <label>Start Date:</label>
+              <div className="date-group">
                 <input
                   type="date"
                   value={travelDates.start}
                   onChange={(e) => setTravelDates({ ...travelDates, start: e.target.value })}
+                  placeholder="Start Date"
                 />
-                <label>End Date:</label>
                 <input
                   type="date"
                   value={travelDates.end}
                   onChange={(e) => setTravelDates({ ...travelDates, end: e.target.value })}
+                  placeholder="End Date"
                 />
-                <button onClick={() => handleNextStep(`From ${travelDates.start} to ${travelDates.end}`)}>
+                <button
+                  className="confirm-btn"
+                  onClick={() => handleNextStep(`From ${travelDates.start} to ${travelDates.end}`)}
+                >
                   Confirm
                 </button>
               </div>
@@ -274,17 +240,19 @@ const Chatbot = () => {
                     type="text"
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === "Enter") handleNextStep(inputValue);
-                    }}
-                    placeholder="Or type your answer..."
+                    onKeyPress={(e) => e.key === "Enter" && handleNextStep(inputValue)}
+                    placeholder="Type your answer..."
                   />
                   <button className="send-btn" onClick={() => handleNextStep(inputValue)}>Send</button>
                 </div>
               </>
             )}
-          </>
+          </div>
         )}
+      </div>
+      <div className="background-section">
+        <div className="image"><img src="/ai.png" alt="" /></div>
+        <div className="welcome-text">Hi, I am Noela.</div>
       </div>
     </div>
   );
