@@ -7,7 +7,7 @@ const Chatbot = () => {
   const [messages, setMessages] = useState(() => {
     const savedMessages = localStorage.getItem('chatbotMessages');
     return savedMessages ? JSON.parse(savedMessages) : [
-      { text: "Hi, I am Noela TravelBot. Let's create your personalized itinerary!", sender: "bot" }
+      { text: "Hi, I am Ved TravelBot. Let's create your personalized itinerary!", sender: "bot" }
     ];
   });
   const [step, setStep] = useState(() => parseInt(localStorage.getItem('chatbotStep')) || 0);
@@ -46,7 +46,7 @@ const Chatbot = () => {
   ];
 
   const options = {
-    0: ["Delhi", "Jaipur", "Goa", "Kerala", "Manali", "Varanasi", "Mysore", "Bengaluru", "No Preferred Destination"],
+    0: ["Delhi", "Jaipur", "Goa", "Kerala", "Manali", "Varanasi", "Mysore", "Bengaluru"],
     3: ["Solo", "Family", "With Kids", "Group"],
     4: ["Low", "Medium", "High", "Luxury"],
     5: ["Flight", "Train", "Car", "Bus"],
@@ -251,8 +251,10 @@ const Chatbot = () => {
         )}
       </div>
       <div className="background-section">
-        <div className="image"><img src="/pic.webp" alt="" /></div>
-        <div className="welcome-text">Hi, I am ved.</div>
+
+        <div className="image"><img src="/ai.png" alt="" /></div>
+        <div className="welcome-text">Hi, I am Ved.</div>
+
       </div>
     </div>
   );
