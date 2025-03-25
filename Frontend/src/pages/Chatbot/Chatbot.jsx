@@ -7,7 +7,7 @@ const Chatbot = () => {
   const [messages, setMessages] = useState(() => {
     const savedMessages = localStorage.getItem('chatbotMessages');
     return savedMessages ? JSON.parse(savedMessages) : [
-      { text: "Hi, I am Noela TravelBot. Let's create your personalized itinerary!", sender: "bot" }
+      { text: "Hi, I am Ved TravelBot. Let's create your personalized itinerary!", sender: "bot" }
     ];
   });
   const [step, setStep] = useState(() => parseInt(localStorage.getItem('chatbotStep')) || 0);
@@ -251,8 +251,10 @@ const Chatbot = () => {
         )}
       </div>
       <div className="background-section">
+
         <div className="image"><img src="/ai.png" alt="" /></div>
-        <div className="welcome-text">Hi, I am Noela.</div>
+        <div className="welcome-text">Hi, I am Ved.</div>
+
       </div>
     </div>
   );
