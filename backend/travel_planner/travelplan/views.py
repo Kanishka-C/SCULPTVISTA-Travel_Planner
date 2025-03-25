@@ -1,4 +1,3 @@
-
 # views.py
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -109,6 +108,7 @@ def extract_hotels_and_restaurants(itinerary_data):
 
     return hotels, restaurants
 
+
 class GenerateItineraryView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -118,25 +118,41 @@ class GenerateItineraryView(APIView):
             preference = serializer.save(user=request.user)
             try:
                 gemini_service = GeminiService()
-                itinerary_data = gemini_service.generate_itinerary(preference.to_dict())
+                preference_dict = preference.to_dict()
+                preference_dict['startPoint'] = preference_dict.pop('departure')
+                print(f"Input preference_dict: {preference_dict}")
+
+                itinerary_data = gemini_service.generate_itinerary(preference_dict)
+                print(f"Raw itinerary_data from Gemini: {itinerary_data}")
+                
+                # Force startPoint
+                if 'startPoint' not in itinerary_data or itinerary_data['startPoint'] != preference_dict['startPoint']:
+                    print(f"Forcing startPoint to {preference_dict['startPoint']} (was {itinerary_data.get('startPoint', 'not set')})")
+                    itinerary_data['startPoint'] = preference_dict['startPoint']
+
                 itinerary = Itinerary.objects.create(
                     user=request.user,
                     preference=preference,
                     itinerary_data=itinerary_data
                 )
-                # Process the itinerary_data to include lat/lng immediately after generation
                 hotels, restaurants = extract_hotels_and_restaurants(itinerary_data)
                 hotel_locations = [fetch_place_id(h['name'], h['context'], h['placeId']) for h in hotels]
                 restaurant_locations = [fetch_place_id(r['name'], r['context'], r['placeId']) for r in restaurants]
+                
+                # Construct response with enforced startPoint
                 response_data = {
                     'id': itinerary.id,
                     'user': itinerary.user.id,
                     'preference': itinerary.preference.id,
-                    'itinerary_data': itinerary_data,
+                    'itinerary_data': {
+                        **itinerary_data,  # Spread existing data
+                        'startPoint': preference_dict['startPoint']  # Force again here
+                    },
                     'hotels': hotel_locations,
                     'restaurants': restaurant_locations,
                     'created_at': itinerary.created_at.isoformat()
                 }
+                print(f"Final response_data: {response_data}")
                 return Response(response_data, status=status.HTTP_201_CREATED)
             except Exception as e:
                 return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -186,4 +202,3 @@ class UserItinerariesView(APIView):
         else:
             serializer = ItinerarySerializer(itineraries, many=True)
             return Response(serializer.data)
-
