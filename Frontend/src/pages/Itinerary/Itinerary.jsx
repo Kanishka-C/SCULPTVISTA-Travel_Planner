@@ -16,7 +16,7 @@ const Itinerary = () => {
   const [mapCenter, setMapCenter] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  const googleMapsApiKey = "your api key"; // Replace with your actual key
+  const googleMapsApiKey = "your key"; // Replace with your actual key
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey,
@@ -183,18 +183,18 @@ const Itinerary = () => {
   
     // Set font and margins
     const leftMargin = 15;
-    const rightMargin = 15;
-    const pageWidth = 210;
-    const maxWidth = pageWidth - leftMargin - rightMargin;
-    const pageHeight = 297;
+    const rightMargin = 25; // Corrected margin
+    const pageWidth = 150; // A4 width in mm
+    const maxWidth = 120; // Corrected max width
+    const pageHeight = 297; // A4 height in mm
     let yOffset = 20;
   
-    // Clean and trim cost text to avoid unnecessary spaces
+    // Clean and trim cost text to avoid unnecessary symbols
     const cleanCost = (cost) => {
       if (typeof cost === "string") {
         return cost
-          .normalize("NFKD")
-          .replace(/[^\d₹.,-]/g, "")
+          .replace(/[^\d₹.,-]/g, "") // Keep only digits, ₹, and punctuation
+          .replace(/11/g, "") // Remove unwanted small 11
           .trim();
       }
       return cost;
@@ -205,60 +205,60 @@ const Itinerary = () => {
       return text.replace(/\s+/g, " ").trim(); // Remove extra spaces
     };
   
-    // Function to add a section title (keep original format for Overview and Notes)
+    // Function to add a section title with consistent formatting
     const addSectionTitle = (title, fontSize = 14) => {
       doc.setFont("helvetica", "bold");
       doc.setFontSize(fontSize);
-      const splitTitle = doc.splitTextToSize(cleanText(title), maxWidth);
-      doc.text(splitTitle, leftMargin, yOffset);
-      yOffset += splitTitle.length * 7 + 3;
+      doc.text(cleanText(title), leftMargin, yOffset);
+      yOffset += 8;
     };
   
-    // Function to add content with uniform style (keep original for Overview and Notes)
-    const addContent = (text, indent = 5, spacing = 5, fontSize = 10) => {
+    // Function to add content with dynamic text wrapping and margin checks
+    const addContent = (text, indent = 5, spacing = 5, fontSize = 11) => {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(fontSize);
-      const splitText = doc.splitTextToSize(cleanText(text), maxWidth - indent);
-      const textHeight = splitText.length * 5;
   
-      if (yOffset + textHeight > pageHeight - 20) {
-        doc.addPage();
-        yOffset = 20;
-      }
+      const cleanedText = cleanText(text);
+      const lines = doc.splitTextToSize(cleanedText, maxWidth - indent);
   
-      doc.text(splitText, leftMargin + indent, yOffset);
-      yOffset += textHeight + spacing;
+      lines.forEach((line) => {
+        if (yOffset + 6 > pageHeight - 20) {
+          doc.addPage();
+          yOffset = 20;
+        }
+        doc.text(line, leftMargin + indent, yOffset);
+        yOffset += 6;
+      });
+  
+      yOffset += spacing;
     };
   
-    // ✅ Overview - No Changes
+    // ✅ Overview Section
     addSectionTitle("Overview");
-    addContent(`Trip Name: ${itinerary.itinerary_data.tripName || "N/A"}`);
-    addContent(`Duration: ${itinerary.itinerary_data.duration || "N/A"}`);
-    addContent(`Start Point: ${itinerary.itinerary_data.startPoint || "N/A"}`);
-    addContent(`End Point: ${itinerary.itinerary_data.endPoint || "N/A"}`);
-    addContent(`Travel Style: ${itinerary.itinerary_data.travelStyle || "N/A"}`);
-    addContent(`Season: ${itinerary.itinerary_data.season || "N/A"}`);
+    addContent(`Trip Name: ${cleanText(itinerary.itinerary_data.tripName || "N/A")}`);
+    addContent(`Duration: ${cleanText(itinerary.itinerary_data.duration || "N/A")}`);
+    addContent(`Start Point: ${cleanText(itinerary.itinerary_data.startPoint || "N/A")}`);
+    addContent(`End Point: ${cleanText(itinerary.itinerary_data.endPoint || "N/A")}`);
+    addContent(`Travel Style: ${cleanText(itinerary.itinerary_data.travelStyle || "N/A")}`);
+    addContent(`Season: ${cleanText(itinerary.itinerary_data.season || "N/A")}`);
     yOffset += 5;
   
-    // ✅ Daily Plan Section - FIXED
+    // ✅ Daily Plan Section
     addSectionTitle("Daily Plan");
-  
     if (itinerary.itinerary_data.itinerary?.length > 0) {
       itinerary.itinerary_data.itinerary.forEach((day) => {
-        addContent(`Day ${day.day}: ${day.title}`, 0, 3, 12); // Day Title
+        addContent(`Day ${day.day}: ${cleanText(day.title)}`, 0, 3, 12);
   
         day.schedule.forEach((item) => {
           const timeLabel =
-            item.time.includes(":") ||
-            ["Breakfast", "Lunch", "Dinner"].includes(item.time)
+            item.time.includes(":") || ["Breakfast", "Lunch", "Dinner"].includes(item.time)
               ? item.time
               : `${item.time}:`;
   
           const activityText = cleanText(item.activity);
-          const cost = item.costPerPerson
-            ? ` (Cost: ₹${cleanCost(item.costPerPerson)})`
-            : "";
+          const cost = item.costPerPerson ? ` (Cost: ₹${cleanCost(item.costPerPerson)})` : "";
   
+          // Ensure multi-line split for long activity details
           addContent(`${timeLabel} ${activityText}${cost}`, 5, 2);
         });
         yOffset += 3;
@@ -268,9 +268,8 @@ const Itinerary = () => {
     }
     yOffset += 5;
   
-    // ✅ Hotel Recommendations Section - FIXED
+    // ✅ Hotel Recommendations Section
     addSectionTitle("Hotel Recommendations");
-  
     if (itinerary.itinerary_data.hotelRecommendations?.length > 0) {
       itinerary.itinerary_data.hotelRecommendations.forEach((hotel) => {
         addContent(`${hotel.category}:`, 5, 3, 12);
@@ -281,69 +280,49 @@ const Itinerary = () => {
     }
     yOffset += 5;
   
-    // ✅ Hotel Cost Estimate Section - FIXED
+    // ✅ Hotel Cost Estimate Section
     if (itinerary.itinerary_data.hotelCostEstimate) {
       addSectionTitle("Hotel Cost Estimate");
   
       addContent(
-        `Cost per Room per Night: ₹${cleanCost(
-          itinerary.itinerary_data.hotelCostEstimate.costPerRoomPerNight
-        )}`,
+        `Cost per Room per Night: ₹${cleanCost(itinerary.itinerary_data.hotelCostEstimate.costPerRoomPerNight)}`,
         5
       );
       addContent(
-        `Cost per Person: ₹${cleanCost(
-          itinerary.itinerary_data.hotelCostEstimate.costPerPerson
-        )}`,
+        `Cost per Person: ₹${cleanCost(itinerary.itinerary_data.hotelCostEstimate.costPerPerson)}`,
         5
       );
-      addContent(
-        `Assumptions: ${cleanText(itinerary.itinerary_data.hotelCostEstimate.assumptions)}`,
-        5
-      );
+      addContent(`Assumptions: ${cleanText(itinerary.itinerary_data.hotelCostEstimate.assumptions)}`, 5);
     }
     yOffset += 5;
   
-    // ✅ Budget Breakdown Section - FIXED
+    // ✅ Budget Breakdown Section
     addSectionTitle("Budget Breakdown");
-  
     if (itinerary.itinerary_data.budgetCalculation) {
       const budgetItems = [
         {
           label: "Total Estimated Budget",
-          value: `₹${cleanCost(
-            itinerary.itinerary_data.budgetCalculation.totalEstimatedBudgetPerPerson
-          )}`,
+          value: `₹${cleanCost(itinerary.itinerary_data.budgetCalculation.totalEstimatedBudgetPerPerson)}`,
         },
         {
           label: "Transportation",
-          value: `₹${cleanCost(
-            itinerary.itinerary_data.budgetCalculation.transportation.totalTransportation
-          )}`,
+          value: `₹${cleanCost(itinerary.itinerary_data.budgetCalculation.transportation.totalTransportation)}`,
         },
         {
           label: "Accommodation",
-          value: `₹${cleanCost(
-            itinerary.itinerary_data.budgetCalculation.accommodation
-          )}`,
+          value: `₹${cleanCost(itinerary.itinerary_data.budgetCalculation.accommodation)}`,
         },
         {
           label: "Food",
-          value: `₹${cleanCost(
-            itinerary.itinerary_data.budgetCalculation.food.totalFood
-          )}`,
+          value: `₹${cleanCost(itinerary.itinerary_data.budgetCalculation.food.totalFood)}`,
         },
         {
           label: "Activities Entry Fees",
-          value: `₹${cleanCost(
-            itinerary.itinerary_data.budgetCalculation.activitiesEntryFees
-          )}`,
+          value: `₹${cleanCost(itinerary.itinerary_data.budgetCalculation.activitiesEntryFees)}`,
         },
         {
           label: "Miscellaneous",
-          value: `₹${cleanCost(
-            itinerary.itinerary_data.budgetCalculation.miscellaneous
-          )}`,
+          value: `₹${cleanCost(itinerary.itinerary_data.budgetCalculation.miscellaneous)}`,
         },
       ];
   
@@ -355,7 +334,7 @@ const Itinerary = () => {
     }
     yOffset += 5;
   
-    // ✅ Important Notes and Tips - No Changes
+    // ✅ Important Notes and Tips Section
     addSectionTitle("Important Notes and Tips");
     if (itinerary.itinerary_data.importantNotesAndTips?.length > 0) {
       itinerary.itinerary_data.importantNotesAndTips.forEach((tip, index) => {
@@ -365,11 +344,9 @@ const Itinerary = () => {
       addContent("No notes or tips available.");
     }
   
-    // Save the PDF
+    // Save the PDF with all cleaned and aligned content
     doc.save(`Itinerary_${cleanText(itinerary.itinerary_data.tripName || "Trip")}.pdf`);
   };
-  
-  
   
   
   if (!backendItinerary) {

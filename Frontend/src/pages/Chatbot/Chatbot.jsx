@@ -253,7 +253,12 @@ const Chatbot = () => {
       <div className="background-section">
 
         <div className="image"><img src="/ai.png" alt="" /></div>
-        <div className="welcome-text">Hi, I am Ved.</div>
+        <div className="welcome-text">
+        <h1>Sculptvista</h1>
+        <p>Plan smarter, travel better</p>
+          <p> AI-powered itineraries just for you!</p>
+         </div>
+
 
       </div>
     </div>
